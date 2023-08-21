@@ -1,0 +1,11 @@
+build/
+*.DS_store
+sui.log.*
+Move.lock
+.idea
+book
+.env
+.deno
+node_modules
+tmp.*
+test.*
