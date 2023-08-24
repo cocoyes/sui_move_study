@@ -58,8 +58,17 @@ module sui_intro_unit_two::student_score_manage {
         requestAddr: address
     }
 
+        // add score event
+    struct AddScoreEvent has copy,drop {
+        bizId: ID,
+        stuId: ID,
+        courseId: ID,
+        score: u8
+        requestAddr: address
+    }
+
     // add student info
-    public entry fun addStudent(ctx: &mut TxContext,power:&OperatePower,name:string::String,sex:u8,stuAddr:address) {
+    public entry fun addStudent(ctx: &mut TxContext,power:&OperatePower,name:string::String,sex:u8) {
         assert!(power.type==0||power.type==1,NO_POWER_CODE);
         let studentObject = StudentInfo{
             id: object::new(ctx),
@@ -75,8 +84,8 @@ module sui_intro_unit_two::student_score_manage {
                 sex: sex,
                 requestAddr: tx_context::sender(ctx)
             });
-        transfer::transfer(
-            studentObject,stuAddr
+        transfer::share_object(
+            studentObject
         );
     }
 
@@ -89,5 +98,24 @@ module sui_intro_unit_two::student_score_manage {
     }
 
     // add student score
-    public entry fun addScoreInfo(ctx: &mut TxContext,_:&OperatePower,stuId::ID,)
+    public entry fun addScoreInfo(ctx: &mut TxContext,_:&OperatePower,student:&StudentInfo,course:&CourseInfo,score:u8){
+        let StudentInfo {studentId:ID}=student;
+        let CourseInfo {courseId:ID}=course;
+        let scoreObj = ScoreInfo{
+            id:object::new(ctx),
+            stuId: studentId,
+            courseId: courseId,
+            score: score
+        };
+        event::emit(
+            AddScoreEvent {
+                bizId: object::uid_to_inner(&scoreObj.id),
+                stuId: studentId,
+                courseId: courseId,
+                score: score,
+                requestAddr: tx_context::sender(ctx)
+            });
+        transfer::share_object(scoreObj);
+
+    }
 }
