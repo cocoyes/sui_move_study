@@ -42,7 +42,12 @@ module sui_intro_unit_two::student_score_manage {
         transfer::transfer(AdminPower{
                 id: object::new(ctx)
             }, tx_context::sender(ctx)
-        )
+        );
+        transfer::transfer(OperatePower{
+                id: object::new(ctx),
+                type: 0
+            }, tx_context::sender(ctx)
+        );
     }
 
     // add student event
@@ -74,4 +79,15 @@ module sui_intro_unit_two::student_score_manage {
             studentObject,stuAddr
         );
     }
+
+    // add course info
+    public entry fun addCourse(ctx: &mut TxContext,_:&AdminPower,name: string::String){
+        transfer::share_object(CourseInfo{
+            id: object::new(ctx),
+            name: name
+        });
+    }
+
+    // add student score
+    public entry fun addScoreInfo(ctx: &mut TxContext,_:&OperatePower,stuId::ID,)
 }
