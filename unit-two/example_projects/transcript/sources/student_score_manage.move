@@ -63,7 +63,7 @@ module sui_intro_unit_two::student_score_manage {
         bizId: ID,
         stuId: ID,
         courseId: ID,
-        score: u8
+        score: u8,
         requestAddr: address
     }
 
@@ -99,23 +99,33 @@ module sui_intro_unit_two::student_score_manage {
 
     // add student score
     public entry fun addScoreInfo(ctx: &mut TxContext,_:&OperatePower,student:&StudentInfo,course:&CourseInfo,score:u8){
-        let StudentInfo {studentId:ID}=student;
-        let CourseInfo {courseId:ID}=course;
+        let StudentInfo {id: studentId,name: _,sex:_} = student;
+        let CourseInfo {id: courseId,name:_}=course;
         let scoreObj = ScoreInfo{
             id:object::new(ctx),
-            stuId: studentId,
-            courseId: courseId,
+            stuId: object::uid_to_inner(studentId),
+            courseId: object::uid_to_inner(courseId),
             score: score
         };
         event::emit(
             AddScoreEvent {
                 bizId: object::uid_to_inner(&scoreObj.id),
-                stuId: studentId,
-                courseId: courseId,
+                stuId: object::uid_to_inner(studentId),
+                courseId: object::uid_to_inner(courseId),
                 score: score,
                 requestAddr: tx_context::sender(ctx)
             });
         transfer::share_object(scoreObj);
 
+    }
+
+    // add power
+    public entry fun addPower(ctx: &mut TxContext,opAddress: address,type: u8,_:&AdminPower){
+        transfer::transfer(
+            OperatePower{
+                id: object::new(ctx),
+                type: type
+            },opAddress
+        );
     }
 }
